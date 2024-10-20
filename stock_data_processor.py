@@ -107,5 +107,5 @@ if __name__ == "__main__":
     parser.add_argument("--random_files", type=int, default=0, help="Number of random files to process in addition to required files (default: 0)")
     
     args = parser.parse_args()
-    
-    process_csv_files(args.in_folder, args.out_folder, args.frac, args.random_files)p
+
+    process_csv_files(args.in_folder, args.out_folder, args.frac, args.random_files)
