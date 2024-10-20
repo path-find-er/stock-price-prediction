@@ -57,7 +57,7 @@ def estimate_iterations(
     total_sequences: int = sum(
         max(0, len(row.dropna()) - sequence_length + 1) for _, row in df.iterrows()
     )
-    estimated_iterations: int = math.ceil(total_sequences / batch_size)
+    estimated_iterations: int = math.ceil(total_sequences / batch_size) * 4 # TODO figure out why this works.
     logging.info(f"Total sequences: {total_sequences}")
     logging.info(f"Estimated iterations per epoch: {estimated_iterations}")
     return estimated_iterations
