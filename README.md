@@ -2,7 +2,9 @@
 
 This project implements a machine learning model to predict stock price movements using historical price and volume data.
 
-## Project Structure```
+## Project Structure
+
+```
 project_root/
 │
 ├── data/
