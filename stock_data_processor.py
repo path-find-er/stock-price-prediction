@@ -51,11 +51,11 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
             df['Time'] = df['Date'].dt.time
             df['Date'] = df['Date'].dt.date
 
-            # Combine median_price, median_volume, and DateTimeInt into a single 'data' column
-            df['data'] = df['median_price'].astype(str) + '|' + df['median_volume'].astype(str) + '|' + df['DateTimeInt'].astype(str)
+            # Combine price, volume, and DateTimeInt into a single 'data' column
+            df['data'] = df['price'].astype(str) + '|' + df['volume'].astype(str) + '|' + df['DateTimeInt'].astype(str)
 
             # Remove now-redundant columns
-            df = df.drop(columns=['median_price', 'median_volume', 'DateTimeInt'])
+            df = df.drop(columns=['price', 'volume', 'DateTimeInt'])
 
             # Pivot the DataFrame to have Times as columns and Dates as rows
             df_pivot = df.pivot(index='Date', columns='Time', values='data')

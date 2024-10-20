@@ -2,9 +2,7 @@
 
 This project implements a machine learning model to predict stock price movements using historical price and volume data.
 
-## Project Structure
-
-```
+## Project Structure```
 project_root/
 │
 ├── data/
@@ -46,8 +44,12 @@ project_root/
    ```
 
 3. Prepare your data:
-   - Place raw CSV files in the `data/raw/` directory
-   - Run the data processor:
+   - Place raw CSV files in the `data/raw/` directory. Each CSV file should contain:
+     - `date`: Date and time (format: "YYYY-MM-DD HH:MM:SS")
+     - `price`: Stock price for the time period
+     - `volume`: Stock volume for the time period
+   - Name CSV files with the stock ticker (e.g., `SPY.csv` for S&P 500 ETF)
+   - Process the data:
      ```
      python stock_data_processor.py
      ```
@@ -81,3 +83,4 @@ Please read `CONTRIBUTING.md` for details on our code of conduct and the process
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
+
