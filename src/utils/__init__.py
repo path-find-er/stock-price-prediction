@@ -1,3 +1,3 @@
-# This file was automatically generatedfrom .helpers import calculate_random_guess_stats
+from .helpers import calculate_random_guess_stats, estimate_iterations
 
-__all__ = ['calculate_random_guess_stats']
+__all__ = ['calculate_random_guess_stats', 'estimate_iterations']

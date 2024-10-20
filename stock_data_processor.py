@@ -41,15 +41,15 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
             # Load the CSV file into a pandas DataFrame
             df = pd.read_csv(os.path.join(in_folder, csv_file))
             
-            # Convert 'Date' column to datetime format
-            df['Date'] = pd.to_datetime(df['Date'])
+            # Convert 'date' column to datetime format
+            df['date'] = pd.to_datetime(df['date'])
 
             # Create a DateTimeInt column (Unix timestamp divided by 600 seconds, or 10 minutes)
-            df['DateTimeInt'] = (df['Date'].astype(int) // 10**9 // 600).astype(int)
+            df['DateTimeInt'] = (df['date'].astype(int) // 10**9 // 600).astype(int)
             
             # Extract time and date from the datetime
-            df['Time'] = df['Date'].dt.time
-            df['Date'] = df['Date'].dt.date
+            df['Time'] = df['date'].dt.time
+            df['Date'] = df['date'].dt.date
 
             # Combine price, volume, and DateTimeInt into a single 'data' column
             df['data'] = df['price'].astype(str) + '|' + df['volume'].astype(str) + '|' + df['DateTimeInt'].astype(str)
@@ -100,8 +100,8 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process stock data CSV files and create train/validation datasets.")
-    parser.add_argument("--in_folder", default="processed/features", help="Input folder containing CSV files")
-    parser.add_argument("--out_folder", default="processed/train", help="Output folder for processed files")
+    parser.add_argument("--in_folder", default="data/raw", help="Input folder containing CSV files")
+    parser.add_argument("--out_folder", default="data/processed/train", help="Output folder for processed files")
     parser.add_argument("--frac", type=float, default=0.05, help="Fraction of data to sample (default: 0.05)")
     parser.add_argument("--random_files", type=int, default=0, help="Number of random files to process in addition to required files (default: 0)")
     

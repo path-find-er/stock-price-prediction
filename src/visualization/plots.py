@@ -1,4 +1,4 @@
-# This file was automatically generatedimport matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 
 def plot_training_history(train_losses, val_losses, val_accuracies):

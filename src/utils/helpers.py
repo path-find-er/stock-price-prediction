@@ -1,6 +1,7 @@
 import math
 import torch
 from torch.utils.data import DataLoader
+import pandas as pd
 
 def calculate_random_guess_stats(dataset, num_samples=None):
     dataloader = DataLoader(dataset, batch_size=1)

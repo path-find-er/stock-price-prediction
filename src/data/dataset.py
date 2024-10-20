@@ -1,47 +1,51 @@
-# This file was automatically generatedimport torch
-from torch.utils.data import Dataset
-import pandas as pd
+import math
+import torch
+from torch.utils.data import IterableDataset, DataLoader
+import csv
+from sklearn.preprocessing import StandardScaler
+import joblib
+import os
 import numpy as np
 
-class PriceVolumeDataset(Dataset):
-    def __init__(self, csv_file, sequence_length, scalers):
-        self.df = pd.read_csv(csv_file, header=None)
+class PriceVolumeDataset(IterableDataset):
+    def __init__(self, csv_file, sequence_length, scalers=None):
+        self.csv_file = csv_file
         self.sequence_length = sequence_length
         self.scalers = scalers
-        self.data = self._preprocess_data()
 
-    def _preprocess_data(self):
-        processed_data = []
-        for _, row in self.df.iterrows():
-            price, volume, datetime_int = self._series_to_list(row)
-            if len(price) >= self.sequence_length:
-                scaled_price = self.scalers['price'].transform([[p] for p in price]).flatten()
-                scaled_volume = self.scalers['volume'].transform([[v] for v in volume]).flatten()
-                scaled_datetime = self.scalers['datetime'].transform([[d] for d in datetime_int]).flatten()
-                
-                for i in range(len(price) - self.sequence_length):
-                    sequence = np.column_stack((
-                        scaled_price[i:i+self.sequence_length],
-                        scaled_volume[i:i+self.sequence_length],
-                        scaled_datetime[i:i+self.sequence_length]
-                    ))
-                    target = 1 if price[i+self.sequence_length] > price[i+self.sequence_length-1] else 0
-                    processed_data.append((sequence, target))
-        return processed_data
+    def __iter__(self):
+        with open(self.csv_file, 'r') as f:
+            reader = csv.reader(f)
+            buffer = []
+            for line in reader:
+                for cell in line:
+                    data = cell.split('|')
+                    if len(data) != 3:
+                        continue
+                    price, volume, datetime_int = data
+                    if not all(map(self.is_valid_float, [price, volume, datetime_int])):
+                        continue
+                    price, volume, datetime_int = map(float, [price, volume, datetime_int])
+                    if self.scalers:
+                        price = self.scalers['price'].transform([[price]])[0][0]
+                        volume = self.scalers['volume'].transform([[volume]])[0][0]
+                        datetime_int = self.scalers['datetime'].transform([[datetime_int]])[0][0]
 
-    def _series_to_list(self, series):
-        price, volume, datetime_int = [], [], []
-        for element in series:
-            if pd.notna(element):
-                p, v, d = element.split('|')
-                price.append(float(p))
-                volume.append(float(v))
-                datetime_int.append(float(d))
-        return price, volume, datetime_int
+                    buffer.append([price, volume, datetime_int])
+                    
+                    # When buffer reaches sequence_length + 1, yield the sequence and target
+                    if len(buffer) == self.sequence_length + 1:
+                        sequence = torch.tensor(buffer[:-1], dtype=torch.float32)
+                        # Set target to 1 if price went up, 0 if it stayed the same or went down
+                        target = torch.tensor(1.0 if buffer[-1][0] > buffer[-2][0] else 0.0, dtype=torch.float32).unsqueeze(0)
+                        yield sequence, target
+                        # Remove the oldest element to make room for the next one
+                        buffer.pop(0)
 
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        sequence, target = self.data[idx]
-        return torch.FloatTensor(sequence), torch.FloatTensor([target])
+    @staticmethod
+    def is_valid_float(value):
+        try:
+            float_value = float(value)
+            return not np.isnan(float_value) and not np.isinf(float_value)
+        except ValueError:
+            return False
