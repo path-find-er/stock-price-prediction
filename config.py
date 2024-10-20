@@ -1,18 +1,28 @@
-
 import torch
+import logging
 
 # Device Configuration
 # DEVICE = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 
 # torch configs for NVIDIA GPUs
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = False
 
+# torch configs for AMD GPUs
+# if not torch.cuda.is_available():
+#     try:
+#         import torch_directml
+#         DEVICE = torch_directml.device()
+#         print("Using DirectML for AMD GPU acceleration")
+#     except ImportError:
+#         print("DirectML not available. Falling back to CPU.")
+#         DEVICE = torch.device('cpu')
+
 # Directory Configuration
-PROCESSED_DIR = 'data/processed'
-RAW_DIR = 'data/raw'
-CHECKPOINT_DIR = 'checkpoints'
+PROCESSED_DIR = "data/processed"
+RAW_DIR = "data/raw"
+CHECKPOINT_DIR = "checkpoints"
 
 # Data Processing Configuration
 SEQUENCE_LENGTH = 32
@@ -26,7 +36,7 @@ HIDDEN_SIZE = SEQUENCE_LENGTH
 
 # Training Configuration
 LEARNING_RATE = 0.001
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1000
 PATIENCE = 25  # for early stopping
 
 # Evaluation Configuration
@@ -35,34 +45,39 @@ SAMPLE_RATIO = 1.0  # for calculating random guess stats
 # Visualization Configuration
 MOVING_AVERAGE_WINDOW = 30  # for price trend visualization
 
-# Add any other configuration parameters here
 
 # Function to get all config parameters as a dictionary
 def get_config_dict():
-    return {key: value for key, value in globals().items() 
-            if key.isupper() and not key.startswith('__')}
+    return {
+        key: value
+        for key, value in globals().items()
+        if key.isupper() and not key.startswith("__")
+    }
 
-# Print config data
-print("Device:", DEVICE)
-print("CUDA available:", torch.cuda.is_available())
-print("cuDNN benchmark:", torch.backends.cudnn.benchmark)
-print("cuDNN deterministic:", torch.backends.cudnn.deterministic)
-print("Processed directory:", PROCESSED_DIR)
-print("Raw directory:", RAW_DIR)
-print("Checkpoint directory:", CHECKPOINT_DIR)
-print("Sequence length:", SEQUENCE_LENGTH)
-print("Batch size:", BATCH_SIZE)
-print("Update scalers:", UPDATE_SCALERS)
-print("Input size:", INPUT_SIZE)
-print("Output size:", OUTPUT_SIZE)
-print("Hidden size:", HIDDEN_SIZE)
-print("Learning rate:", LEARNING_RATE)
-print("Number of epochs:", NUM_EPOCHS)
-print("Patience:", PATIENCE)
-print("Sample ratio:", SAMPLE_RATIO)
-print("Moving average window:", MOVING_AVERAGE_WINDOW)
 
-# You can add more complex configurations or conditional logic here if needed
+# Function to print config data
+def print_config():
+    logging.info("Device: %s", DEVICE)
+    logging.info("CUDA available: %s", torch.cuda.is_available())
+    logging.info("cuDNN benchmark: %s", torch.backends.cudnn.benchmark)
+    logging.info("cuDNN deterministic: %s", torch.backends.cudnn.deterministic)
+    logging.info("Processed directory: %s", PROCESSED_DIR)
+    logging.info("Raw directory: %s", RAW_DIR)
+    logging.info("Checkpoint directory: %s", CHECKPOINT_DIR)
+    logging.info("Sequence length: %d", SEQUENCE_LENGTH)
+    logging.info("Batch size: %d", BATCH_SIZE)
+    logging.info("Update scalers: %s", UPDATE_SCALERS)
+    logging.info("Input size: %d", INPUT_SIZE)
+    logging.info("Output size: %d", OUTPUT_SIZE)
+    logging.info("Hidden size: %d", HIDDEN_SIZE)
+    logging.info("Learning rate: %f", LEARNING_RATE)
+    logging.info("Number of epochs: %d", NUM_EPOCHS)
+    logging.info("Patience: %d", PATIENCE)
+    logging.info("Sample ratio: %f", SAMPLE_RATIO)
+    logging.info("Moving average window: %d", MOVING_AVERAGE_WINDOW)
+
+
+# Add more complex configurations or conditional logic here if needed
 # For example:
 # if DEVICE.type == 'cuda':
 #     BATCH_SIZE *= 2

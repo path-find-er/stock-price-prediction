@@ -5,8 +5,9 @@ import random
 import argparse
 import pandas as pd
 from tqdm import tqdm
+import logging
 
-def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
+def process_csv_files(in_folder: str, out_folder: str, frac: float = 0.05, random_files: int = 0):
     """
     Process CSV files containing stock data and create train/validation datasets.
     
@@ -21,17 +22,17 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
     os.makedirs(out_folder, exist_ok=True)
 
     # Get list of all CSV files in the input folder
-    csv_files = [f for f in os.listdir(in_folder) if f.endswith('.csv')]
+    csv_files: list[str] = [f for f in os.listdir(in_folder) if f.endswith('.csv')]
 
     # Sort the csv files by date (assuming filenames are date-based)
     csv_files.sort()
 
     # Print the selected files
-    print("Processing the following files:", csv_files)
+    logging.info(f"Processing the following files: {csv_files}")
 
     # Initialize empty DataFrames for train and validation data
-    train_data = pd.DataFrame()
-    val_data = pd.DataFrame()
+    train_data: pd.DataFrame = pd.DataFrame()
+    val_data: pd.DataFrame = pd.DataFrame()
 
     # Process each CSV file with a progress bar
     with tqdm(csv_files, desc="Processing CSV files", unit="file") as pbar:
@@ -39,7 +40,7 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
             pbar.set_description(f"Processing {csv_file[:-4]}")
             
             # Load the CSV file into a pandas DataFrame
-            df = pd.read_csv(os.path.join(in_folder, csv_file))
+            df: pd.DataFrame = pd.read_csv(os.path.join(in_folder, csv_file))
             
             # Convert 'date' column to datetime format
             df['date'] = pd.to_datetime(df['date'])
@@ -58,21 +59,21 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
             df = df.drop(columns=['price', 'volume', 'DateTimeInt'])
 
             # Pivot the DataFrame to have Times as columns and Dates as rows
-            df_pivot = df.pivot(index='Date', columns='Time', values='data')
+            df_pivot: pd.DataFrame = df.pivot(index='Date', columns='Time', values='data')
 
             # Reset the index and drop the 'Date' column
             df_pivot.reset_index(inplace=True)
             df_pivot = df_pivot.drop(columns=['Date'])
 
             # Get the ticker from the filename and rename columns to include the ticker
-            ticker = os.path.splitext(csv_file)[0]
+            ticker: str = os.path.splitext(csv_file)[0]
             df_pivot.columns = [f"{col}-{ticker}" for col in df_pivot.columns]
             
             # Split into train and validation sets
-            train_start = int(len(df_pivot) * 0.05)
-            train_end = int(len(df_pivot) * 0.90)
-            val_df = pd.concat([df_pivot.iloc[:train_start], df_pivot.iloc[train_end:]])
-            train_df = df_pivot.iloc[train_start:train_end]
+            train_start: int = int(len(df_pivot) * 0.05)
+            train_end: int = int(len(df_pivot) * 0.90)
+            val_df: pd.DataFrame = pd.concat([df_pivot.iloc[:train_start], df_pivot.iloc[train_end:]])
+            train_df: pd.DataFrame = df_pivot.iloc[train_start:train_end]
             
             # Transpose the dataframes
             train_df = train_df.T
@@ -96,7 +97,7 @@ def process_csv_files(in_folder, out_folder, frac=0.05, random_files=0):
     train_data.to_csv(os.path.join(out_folder, 'train.csv'), index=False, header=False)
     val_data.to_csv(os.path.join(out_folder, 'val.csv'), index=False, header=False)
 
-    print(f"Processed data saved to {out_folder}")
+    logging.info(f"Processed data saved to {out_folder}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process stock data CSV files and create train/validation datasets.")
@@ -107,4 +108,4 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    process_csv_files(args.in_folder, args.out_folder, args.frac, args.random_files)
+    process_csv_files(args.in_folder, args.out_folder, args.frac, args.random_files)p

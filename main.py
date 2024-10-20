@@ -6,51 +6,84 @@ from src.data import PriceVolumeDataset, create_or_load_scalers
 from src.models import PriceVolumePredictor
 from src.utils import estimate_iterations, calculate_random_guess_stats
 from scripts.train import train_model
-from src.evaluation import compute_classification_metrics, plot_confusion_matrix, plot_roc_curve, plot_probability_histogram
+from src.evaluation import (
+    compute_classification_metrics,
+    plot_confusion_matrix,
+    plot_roc_curve,
+    plot_probability_histogram,
+)
 from src.visualization import plot_training_history
 import config
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 def main():
     try:
+        # Print configuration
+        config.print_config()
+
         # Create or load scalers
-        scalers = create_or_load_scalers(config.PROCESSED_DIR, update_scalers=config.UPDATE_SCALERS)
-        
+        scalers = create_or_load_scalers(
+            config.PROCESSED_DIR, update_scalers=config.UPDATE_SCALERS
+        )
+
         # Estimate iterations
         estimated_iterations = estimate_iterations(
-            f'{config.PROCESSED_DIR}/train/train.csv', 
-            config.SEQUENCE_LENGTH, 
-            config.BATCH_SIZE, 
-            sample_ratio=1.0
+            f"{config.PROCESSED_DIR}/train/train.csv",
+            config.SEQUENCE_LENGTH,
+            config.BATCH_SIZE,
+            sample_ratio=1.0,
         )
 
         # Create datasets and data loaders
-        train_dataset = PriceVolumeDataset(f'{config.PROCESSED_DIR}/train/train.csv', config.SEQUENCE_LENGTH, scalers=scalers)
-        val_dataset = PriceVolumeDataset(f'{config.PROCESSED_DIR}/train/val.csv', config.SEQUENCE_LENGTH, scalers=scalers)
+        train_dataset = PriceVolumeDataset(
+            f"{config.PROCESSED_DIR}/train/train.csv",
+            config.SEQUENCE_LENGTH,
+            scalers=scalers,
+        )
+        val_dataset = PriceVolumeDataset(
+            f"{config.PROCESSED_DIR}/train/val.csv",
+            config.SEQUENCE_LENGTH,
+            scalers=scalers,
+        )
 
-        train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, num_workers=4, prefetch_factor=2, pin_memory=True)
-        val_loader = DataLoader(val_dataset, batch_size=config.BATCH_SIZE, num_workers=4, prefetch_factor=2, pin_memory=True)
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=config.BATCH_SIZE,
+            num_workers=4,
+            prefetch_factor=2,
+            pin_memory=True,
+        )
+        val_loader = DataLoader(
+            val_dataset,
+            batch_size=config.BATCH_SIZE,
+            num_workers=4,
+            prefetch_factor=2,
+            pin_memory=True,
+        )
 
         logging.info("Datasets and loaders created successfully.")
 
         # Initialize model
         model = PriceVolumePredictor(
-            input_size=config.INPUT_SIZE, 
-            hidden_size=config.HIDDEN_SIZE, 
-            output_size=config.OUTPUT_SIZE
+            input_size=config.INPUT_SIZE,
+            hidden_size=config.HIDDEN_SIZE,
+            output_size=config.OUTPUT_SIZE,
         ).to(config.DEVICE)
 
         # Train the model
         train_losses, val_losses, val_accuracies = train_model(
-            model, 
-            train_loader, 
-            val_loader, 
-            config.NUM_EPOCHS, 
-            config.LEARNING_RATE, 
-            config.DEVICE, 
+            model,
+            train_loader,
+            val_loader,
+            config.NUM_EPOCHS,
+            config.LEARNING_RATE,
+            config.DEVICE,
             config.PATIENCE,
-            estimated_iterations
+            estimated_iterations,
         )
 
         # Plot training history
@@ -95,6 +128,7 @@ def main():
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         raise
+
 
 if __name__ == "__main__":
     main()
