@@ -1,4 +1,8 @@
-# This file was automatically generated# Import necessary libraries
+# Model implementation based on the minLSTM architecture described in:
+# Feng, L., Tung, F., Ahmed, M. O., Bengio, Y., & Hajimirsadegh, H. (2024).
+#! "Were RNNs All We Needed?"
+# url: https://arxiv.org/pdf/2410.01201
+
 import torch
 import torch.nn as nn
 from tqdm import tqdm
