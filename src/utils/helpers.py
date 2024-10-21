@@ -5,7 +5,7 @@ import pandas as pd
 import logging
 
 
-def calculate_random_guess_stats(dataset, num_samples: int = None) -> dict[str, float]:
+def calculate_random_guess_stats(dataset, num_samples: int | None = None) -> dict[str, float]:
     dataloader: DataLoader = DataLoader(dataset, batch_size=1)
     total_samples: int = 0
     positive_samples: int = 0
