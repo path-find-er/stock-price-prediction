@@ -1,5 +1,6 @@
 import torch
 import logging
+import os
 
 # Device Configuration
 DEVICE = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
@@ -17,8 +18,15 @@ CHECKPOINT_DIR = "checkpoints"
 
 # Data Processing Configuration
 SEQUENCE_LENGTH = 8
-BATCH_SIZE = 2048
+BATCH_SIZE = 2048 * 6
 UPDATE_SCALERS = False
+
+# Dataset Configuration
+TRAIN_NUM_WORKERS = 8
+VAL_NUM_WORKERS = 2
+PREFETCH_FACTOR = 2
+PIN_MEMORY = True
+
 
 # Model Configuration
 INPUT_SIZE = 3
@@ -26,7 +34,7 @@ OUTPUT_SIZE = 1
 HIDDEN_SIZE = SEQUENCE_LENGTH * (SEQUENCE_LENGTH // 2)  # simulated attention
 
 # Training Configuration
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.001
 NUM_EPOCHS = 5000
 PATIENCE = 25  # for early stopping
 
@@ -44,7 +52,6 @@ def get_config_dict():
         for key, value in globals().items()
         if key.isupper() and not key.startswith("__")
     }
-
 
 # Function to print config data
 def print_config():
@@ -72,3 +79,25 @@ def print_config():
 # For example:
 # if DEVICE.type == 'cuda':
 #     BATCH_SIZE *= 2
+
+# Ensure the logs directory exists
+os.makedirs('logs', exist_ok=True)
+
+# Logger Configuration
+# set the name based on config data
+log_filename = f'logs/app_{DEVICE.type}_{SEQUENCE_LENGTH}_{BATCH_SIZE}_{HIDDEN_SIZE}_{LEARNING_RATE:.6f}.log'
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    filename=log_filename,
+    filemode='a'
+)
+logger = logging.getLogger(__name__)
+
+# Add a stream handler to also print logs to console
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+console_handler.setFormatter(console_formatter)
+logger.addHandler(console_handler)

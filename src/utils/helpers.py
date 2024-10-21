@@ -1,8 +1,7 @@
 import math
-import torch
 from torch.utils.data import DataLoader
 import pandas as pd
-import logging
+from config import logger
 
 
 def calculate_random_guess_stats(dataset, num_samples: int | None = None) -> dict[str, float]:
@@ -58,6 +57,6 @@ def estimate_iterations(
         max(0, len(row.dropna()) - sequence_length + 1) for _, row in df.iterrows()
     )
     estimated_iterations: int = math.ceil(total_sequences / batch_size) * 4 # TODO figure out why this works.
-    logging.info(f"Total sequences: {total_sequences}")
-    logging.info(f"Estimated iterations per epoch: {estimated_iterations}")
+    logger.info(f"Total sequences: {total_sequences}")
+    logger.info(f"Estimated iterations per epoch: {estimated_iterations}")
     return estimated_iterations

@@ -3,7 +3,7 @@ import torch.nn as nn
 from tqdm import tqdm
 import os
 import config
-import logging
+from config import logger
 
 
 def train_model(
@@ -107,26 +107,26 @@ def train_model(
             else 0
         )
 
-        logging.info("-" * 50)
-        logging.info(f"Epoch {epoch + 1}/{num_epochs}")
-        logging.info(f"Train Loss: {avg_train_loss:.6f} (Diff: {train_loss_diff:.2f}%)")
-        logging.info(f"Val Loss: {avg_val_loss:.6f} (Diff: {val_loss_diff:.2f}%)")
-        logging.info(
+        logger.info("-" * 50)
+        logger.info(f"Epoch {epoch + 1}/{num_epochs}")
+        logger.info(f"Train Loss: {avg_train_loss:.6f} (Diff: {train_loss_diff:.2f}%)")
+        logger.info(f"Val Loss: {avg_val_loss:.6f} (Diff: {val_loss_diff:.2f}%)")
+        logger.info(
             f"Val Accuracy: {val_accuracy:.4f} (Diff: {val_accuracy_diff:.2f}%)"
         )
 
         # Early Stopping and Checkpoint Saving
         should_save_checkpoint: bool = False
         if val_accuracy > best_val_accuracy:
-            logging.info("New best validation accuracy!")
+            logger.info("New best validation accuracy!")
             best_val_accuracy = val_accuracy
             should_save_checkpoint = True
         if avg_val_loss < best_val_loss:
-            logging.info("New best validation loss!")
+            logger.info("New best validation loss!")
             best_val_loss = avg_val_loss
             should_save_checkpoint = True
         if avg_train_loss < prev_train_loss:
-            logging.info("New best training loss!")
+            logger.info("New best training loss!")
             should_save_checkpoint = True
 
         if should_save_checkpoint:
@@ -144,20 +144,20 @@ def train_model(
                 },
                 checkpoint_path,
             )
-            logging.info(f"Checkpoint saved to {checkpoint_path}")
+            logger.info(f"Checkpoint saved to {checkpoint_path}")
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1
-            logging.info("No improvement in monitored metrics.")
+            logger.info("No improvement in monitored metrics.")
             if epochs_no_improve >= patience:
-                logging.info("Early stopping triggered.")
+                logger.info("Early stopping triggered.")
                 break
-        logging.info("-" * 50)
+        logger.info("-" * 50)
 
         # Update previous values for next epoch
         prev_train_loss = avg_train_loss
         prev_val_loss = avg_val_loss
         prev_val_accuracy = val_accuracy
 
-    logging.info("Training complete.")
+    logger.info("Training complete.")
     return train_losses, val_losses, val_accuracies

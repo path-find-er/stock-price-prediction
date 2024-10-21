@@ -1,7 +1,6 @@
 import os
 import torch
 from torch.utils.data import DataLoader
-import logging
 from src.data import PriceVolumeDataset, create_or_load_scalers
 from src.models import PriceVolumePredictor
 from src.utils import estimate_iterations, calculate_random_guess_stats
@@ -15,10 +14,8 @@ from src.evaluation import (
 from src.visualization import plot_training_history
 import config
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
+# Use the logger from config.py
+logger = config.logger
 
 def main():
     try:
@@ -53,19 +50,19 @@ def main():
         train_loader = DataLoader(
             train_dataset,
             batch_size=config.BATCH_SIZE,
-            num_workers=4,
-            prefetch_factor=2,
-            pin_memory=True,
+            num_workers=config.TRAIN_NUM_WORKERS,
+            prefetch_factor=config.PREFETCH_FACTOR,
+            pin_memory=config.PIN_MEMORY,
         )
         val_loader = DataLoader(
             val_dataset,
             batch_size=config.BATCH_SIZE,
-            num_workers=4,
-            prefetch_factor=2,
-            pin_memory=True,
+            num_workers=config.VAL_NUM_WORKERS,
+            prefetch_factor=config.PREFETCH_FACTOR,
+            pin_memory=config.PIN_MEMORY,
         )
 
-        logging.info("Datasets and loaders created successfully.")
+        logger.info("Datasets and loaders created successfully.")
 
         # Initialize model
         model = PriceVolumePredictor(
@@ -110,9 +107,9 @@ def main():
 
         # Compute and print metrics
         metrics = compute_classification_metrics(all_targets, all_preds, all_probs)
-        logging.info("Classification Metrics:")
+        logger.info("Classification Metrics:")
         for metric, value in metrics.items():
-            logging.info(f"{metric}: {value:.4f}")
+            logger.info(f"{metric}: {value:.4f}")
 
         # Plot evaluation results
         plot_confusion_matrix(all_targets, all_preds)
@@ -121,12 +118,12 @@ def main():
 
         # Calculate and print random guess stats
         random_guess_stats = calculate_random_guess_stats(val_dataset)
-        logging.info("Random Guess Statistics:")
+        logger.info("Random Guess Statistics:")
         for stat, value in random_guess_stats.items():
-            logging.info(f"{stat}: {value}")
+            logger.info(f"{stat}: {value}")
 
     except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
+        logger.error(f"An error occurred: {str(e)}")
         raise
 
 

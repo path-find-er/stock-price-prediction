@@ -5,7 +5,10 @@ import random
 import argparse
 import pandas as pd
 from tqdm import tqdm
-import logging
+import config
+
+# Use the logger from config.py
+logger = config.logger
 
 def process_csv_files(in_folder: str, out_folder: str, frac: float = 0.05, random_files: int = 0):
     """
@@ -28,7 +31,7 @@ def process_csv_files(in_folder: str, out_folder: str, frac: float = 0.05, rando
     csv_files.sort()
 
     # Print the selected files
-    logging.info(f"Processing the following files: {csv_files}")
+    logger.info(f"Processing the following files: {csv_files}")
 
     # Initialize empty DataFrames for train and validation data
     train_data: pd.DataFrame = pd.DataFrame()
@@ -97,7 +100,7 @@ def process_csv_files(in_folder: str, out_folder: str, frac: float = 0.05, rando
     train_data.to_csv(os.path.join(out_folder, 'train.csv'), index=False, header=False)
     val_data.to_csv(os.path.join(out_folder, 'val.csv'), index=False, header=False)
 
-    logging.info(f"Processed data saved to {out_folder}")
+    logger.info(f"Processed data saved to {out_folder}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process stock data CSV files and create train/validation datasets.")
@@ -107,5 +110,10 @@ if __name__ == "__main__":
     parser.add_argument("--random_files", type=int, default=0, help="Number of random files to process in addition to required files (default: 0)")
     
     args = parser.parse_args()
-
+    
+    # Log non-default arguments
+    for arg, value in vars(args).items():
+        if value != parser.get_default(arg):
+            logger.info(f"{arg} = {value}")
+    
     process_csv_files(args.in_folder, args.out_folder, args.frac, args.random_files)
